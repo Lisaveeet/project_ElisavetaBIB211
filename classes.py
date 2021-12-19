@@ -1,62 +1,77 @@
 import pygame
 
 
-all_objects = []# Создаём массив состоящий из всех объектов, чтобы обновлять из местоположение
+all_objects = [] # Создаём массив состоящий из всех объектов, чтобы обновлять их местоположение
 
 
-class Object:#P.s это абстрактный объект
-    def __init__(self, x, y, w, h, color=(0, 0, 0)):# вся игра построена на прямоугольниках
-        #поэтому каждый объкт должен иметь его координаты:высоту,длину; и цвет.
+class Object: # абстрактный объект
+    def __init__(self, x, y, w, h, color=(0, 0, 0)): # вся игра построена на прямоугольниках
+        """ Метод для присваивания каждому объекту его координат (высота, длина), а также цвета.
+        """
         global all_objects
-        self.rect = pygame.rect.Rect(x, y, w, h)#pygame object для создания прямоугольного объекта на заданных координатах,заданных размеров
-        #однако это не "отрисованный" объект.а тот объект с которым происходит взаимодействие
-        self.image = pygame.Surface((w, h))#занимается отрисовкой объекта
-        self.color = color#устанавливаем цвет
-        self.id = 'to_object'#Для инициализации в дальнейшем,что это за объект используется id. (мб удалить?)
-        self.tags = [] #аналогично id
-        self.alive = True #проверка на то что игра не закончилось,используется как "жизнь" в танках
-        all_objects.append(self) #добавляем наш объект в список всех объектов
+        self.rect = pygame.rect.Rect(x, y, w, h) # pygame object для создания прямоугольного объекта на заданных координатах,заданных размеров
+        # однако это не "отрисованный" объект, а тот объект с которым происходит взаимодействие
+        self.image = pygame.Surface((w, h)) # занимается отрисовкой объекта
+        self.color = color # устанавливаем цвет
+        self.id = 'to_object'# для инициализации в дальнейшем,что это за объект используется id
+        self.tags = [] # аналогично id
+        self.alive = True # проверка на то что игра не закончилось,используется как "жизнь"
+        all_objects.append(self) # добавляем наш объект в список всех объектов
 
-    def __repr__(self):#печатаемое формальное представление объекта.
+    def __repr__(self):#
+        """Печатаемое формальное представление объекта.
+        """
         return f'{self.id} {(self.rect.x, self.rect.y)}'
 
-    def update(self, *args):# переопределено в каждом дочернем объекте
+    def update(self, *args):
+        """Переопределено в каждом дочернем объекте.
+        """
         global all_objects
         pass
 
-    def draw(self, surface, *args):#занимется отрисовкой объекта.В данном случае просто рисует 
+    def draw(self, surface, *args): # занимется отрисовкой объекта. В данном случае просто рисует.
+        """#Метод blit() применяется к той поверхности, на которую "накладывается", 
+        т. е. на которой "отрисовывается", другая. 
+        Другими словами, метод blit() применяется к родительской Surface, 
+        в то время как дочерняя передается в качестве аргумента. 
+        """
         self.image.fill(self.color)
-        surface.blit(self.image, self.rect)#Метод blit() применяется к той поверхности, на которую "накладывается", т. е. на которой "отрисовывается", другая. Другими словами, метод blit() применяется к родительской Surface, в то время как дочерняя передается в качестве аргумента. 
+        surface.blit(self.image, self.rect)
 
 
-class Bullet(Object):
+class Bullet(Object): # родительский объект
     def __init__(self, x, y, d, player_color):
-        super().__init__(x, y, 5, 5, (55, 55, 55))#вызываем родительский конструктор
-        self.dir = d# выставляем направление движение пули
-        self.player_color = player_color # выставляем чья это была пуля
+        """ Вызываем родительский конструктор,
+        выставляем направления движения пули, указывая, чья это была пуля.
+        """
+        super().__init__(x, y, 5, 5, (55, 55, 55)) 
+        self.dir = d 
+        self.player_color = player_color 
         self.id = 'to_bullet' # См Object
         self.tags += ['bullet']
 
-    def update(self, *args):#занимается обновлением координат пули
+    def update(self, *args):
+        """Метод, который занимается обновлением координат пули.
+        """
         global all_objects
-        if self.alive:# если игра ещё не закончена или пуля не врезалась в стену
-            self.rect.move_ip(*self.dir) #pygame.Rect.move moves Двигает "пулю" в заданом направлении
-            for object in all_objects:#бежим по всем объектам
-                if 'tank' in object.tags:#проверем танки 
-                    if self.player_color != object.color and self.rect.colliderect(object.rect):#если объект пули "наслоился" на вражеский танк
-                        #то надо End Game бахнуть
-                        #туть
-                        self.alive = False#убиваем себя и танк
+        if self.alive: # если игра ещё не закончена или пуля не врезалась в стену
+            self.rect.move_ip(*self.dir) # pygame.Rect.move moves Двигает "пулю" в заданом направлении
+            for object in all_objects: # бежим по всем объектам
+                if 'tank' in object.tags: # провереям фигуры 
+                    if self.player_color != object.color and self.rect.colliderect(object.rect): # если объект пули "наслоился" на вражеский танк
+                        self.alive = False # убиваем себя и танк
                         object.alive = False
-                elif 'wall' in object.tags:#если наслоились на стену,то пуля не должна двигаться и умирает
+                elif 'wall' in object.tags: # если наслоились на стену, то пуля не должна двигаться и умирает
                     if self.rect.colliderect(object.rect):
                         self.alive = False
 
 
 
-class DefaultTank(Object):#Объект Танка
+class DefaultTank(Object): # Объект фигуры "Танк"
     def __init__(self, x, y, d, color):
-        super().__init__(x, y, 55, 55, color)#Вызываем родительский конструктор
+        """ Присваиваем клавиши для управления фигурами.
+        """
+        super().__init__(x, y, 55, 55, color) # Вызываем родительский конструктор
         self.dir = d # выставляем направление
         self.up = None # клавиши контроля движения
         self.down = None # клавиши контроля
@@ -65,29 +80,31 @@ class DefaultTank(Object):#Объект Танка
         self.shoot = None # клавиши контроля выстрела
         self.shoot_cd = 30 # константное кол-во допустимых выстрелов
         self.prev_shoot = self.shoot_cd # кол-во оставшихся выстрелов данного танка
-        self.id = 'to_deftank' # id что это танк
-        self.tags += ['tank'] # tag что это танк
-        self.alive = True #по дефолту танк жив
+        self.id = 'to_deftank' # id - что это танк
+        self.tags += ['tank'] # tag - что это танк
+        self.alive = True # танк жив
 
-    def set_controls(self, up, down, right, left, shoot):#устанавливаем клавиши контроля
+    def set_controls(self, up, down, right, left, shoot):
+        """ Устанавливаем клавиши контроля.
+        """
         self.up = up
         self.down = down
         self.right = right
         self.left = left
         self.shoot = shoot
 
-    def shot(self):#выстрел
+    def shot(self):# вызываем выстрел
         global all_objects
-        if not self.prev_shoot:#если не ноль то
-            self.prev_shoot = self.shoot_cd #-1 меняем выстрелы у танка
-            bullet = Bullet(self.rect.x + 25, self.rect.y + 25, (self.dir[0] * 2, self.dir[1] * 2), self.color)# создаёп новую пулю
-            all_objects.append(bullet)# добавляем пулю в список всех объектов
+        if not self.prev_shoot: # если не ноль, то
+            self.prev_shoot = self.shoot_cd # -1 меняем выстрелы у танка
+            bullet = Bullet(self.rect.x + 25, self.rect.y + 25, (self.dir[0] * 2, self.dir[1] * 2), self.color) # создаёт новую пулю
+            all_objects.append(bullet) # добавляем пулю в список всех объектов
 
-    def update(self, *args):# функция обновления местоположения танка
+    def update(self, *args): # функция обновления местоположения танка
         global all_objects
         self.prev_shoot = max(0, self.prev_shoot - 1) # если обновляем кол-во выстрелов
 
-        if self.alive:#если танк жив и игра ещё
+        if self.alive: # если танк жив и игра ещё продолжается
             can_move_up = can_move_down = can_move_left = can_move_right = True
             upper_rect = pygame.rect.Rect((self.rect.x, self.rect.y - 1, self.rect.h, self.rect.w))
             lower_rect = pygame.rect.Rect((self.rect.x, self.rect.y + 1, self.rect.h, self.rect.w))
@@ -125,7 +142,7 @@ class DefaultTank(Object):#Объект Танка
             else:
                 raise Exception(f'Не установлено управление для {(self.rect.x, self.rect.y)}')
 
-    def draw(self, surface, *args):
+    def draw(self, surface, *args): # *args используется для передачи произвольного числа неименованных аргументов функции
         self.image.fill(self.color)
         surface.blit(self.image, self.rect)
         if self.dir == (0, -1):
@@ -146,8 +163,8 @@ class DefaultTank(Object):#Объект Танка
                              (self.rect.x + 20, self.rect.y + 20, 25, 15))
 
 
-class DefaultWall(Object):
-    def __init__(self, x, y, w, h, color=(0, 0, 0)):
+class DefaultWall(Object): # Объект стены
+    def __init__(self, x, y, w, h, color=(0, 0, 0)): # аналагочно как и для вышеперечисленных объектов
         super().__init__(x, y, w, h, color)
         self.id = 'to_defwall'
         self.tags += ['wall']
