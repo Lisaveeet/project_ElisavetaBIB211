@@ -9,7 +9,7 @@ FPS = 60#задержка между обновлениями в милисек�
 pygame.init()# создаём "Холст" Pygam'a
 pygame.mouse.set_visible(False)# делаем курсор невидимым
 pygame.display.set_caption("Tanks Offline")# делаем название экрана Tanks Offline
-screen = pygame.display.set_mode((800, 500)) # делаем размер экрана
+screen = pygame.display.set_mode((1000, 700)) # делаем размер экрана
 clock = pygame.time.Clock()# создаём таймер для задержки 
 
 
