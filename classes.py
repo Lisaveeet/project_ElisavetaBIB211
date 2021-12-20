@@ -71,7 +71,7 @@ class DefaultTank(Object): # Объект фигуры "Танк"
     def __init__(self, x, y, d, color):
         """ Присваиваем клавиши для управления фигурами.
         """
-        super().__init__(x, y, 55, 55, color) # Вызываем родительский конструктор
+        super().__init__(x, y, 55, 55, color)#Вызываем родительский конструктор
         self.dir = d # выставляем направление
         self.up = None # клавиши контроля движения
         self.down = None # клавиши контроля
@@ -93,14 +93,18 @@ class DefaultTank(Object): # Объект фигуры "Танк"
         self.left = left
         self.shoot = shoot
 
-    def shot(self):# вызываем выстрел
+    def shot(self):
+        """ Вызываем выстрел.
+        """
         global all_objects
         if not self.prev_shoot: # если не ноль, то
             self.prev_shoot = self.shoot_cd # -1 меняем выстрелы у танка
-            bullet = Bullet(self.rect.x + 25, self.rect.y + 25, (self.dir[0] * 2, self.dir[1] * 2), self.color) # создаёт новую пулю
-            all_objects.append(bullet) # добавляем пулю в список всех объектов
+            Bullet(self.rect.x + 25, self.rect.y + 25, (self.dir[0] * 2, self.dir[1] * 2), self.color) # создаёт новую пулю
 
-    def update(self, *args): # функция обновления местоположения танка
+
+    def update(self, *args):
+        """ Функция обновления местоположения танка.
+        """
         global all_objects
         self.prev_shoot = max(0, self.prev_shoot - 1) # если обновляем кол-во выстрелов
 
@@ -142,7 +146,9 @@ class DefaultTank(Object): # Объект фигуры "Танк"
             else:
                 raise Exception(f'Не установлено управление для {(self.rect.x, self.rect.y)}')
 
-    def draw(self, surface, *args): # *args используется для передачи произвольного числа неименованных аргументов функции
+    def draw(self, surface, *args): 
+        """ Отрисовка направления движения и выстрелов танка.
+        """
         self.image.fill(self.color)
         surface.blit(self.image, self.rect)
         if self.dir == (0, -1):
