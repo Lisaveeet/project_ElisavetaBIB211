@@ -7,6 +7,9 @@ all_objects = [] # Создаём массив состоящий из всех 
 class Object: # абстрактный объект
     def __init__(self, x, y, w, h, color=(0, 0, 0)): # вся игра построена на прямоугольниках
         """ Метод для присваивания каждому объекту его координат (высота, длина), а также цвета.
+        x, y - координаты высоты положения фона (прямоугольника)
+        w, h - координаты длины положения  фона (прямоугольника)
+        color - rgb значение
         """
         global all_objects
         self.rect = pygame.rect.Rect(x, y, w, h) # pygame object для создания прямоугольного объекта на заданных координатах,заданных размеров
@@ -43,6 +46,9 @@ class Bullet(Object): # родительский объект
     def __init__(self, x, y, d, player_color):
         """ Вызываем родительский конструктор,
         выставляем направления движения пули, указывая, чья это была пуля.
+       x, y - координаты положения объекта (пули)
+       d - координаты направления объекта (пули)
+       player_color - цвет объекта (пули)
         """
         super().__init__(x, y, 5, 5, (55, 55, 55)) 
         self.dir = d 
@@ -52,6 +58,7 @@ class Bullet(Object): # родительский объект
 
     def update(self, *args):
         """Метод, который занимается обновлением координат пули.
+        *args используется для передачи произвольного числа неименованных аргументов функции.
         """
         global all_objects
         if self.alive: # если игра ещё не закончена или пуля не врезалась в стену
@@ -70,6 +77,9 @@ class Bullet(Object): # родительский объект
 class DefaultTank(Object): # Объект фигуры "Танк"
     def __init__(self, x, y, d, color):
         """ Присваиваем клавиши для управления фигурами.
+        x, y - координаты положения танка
+        d - координаты направления движения танка
+        color - rgb значение цвета танка
         """
         super().__init__(x, y, 55, 55, color)#Вызываем родительский конструктор
         self.dir = d # выставляем направление
@@ -85,13 +95,13 @@ class DefaultTank(Object): # Объект фигуры "Танк"
         self.alive = True # танк жив
 
     def set_controls(self, up, down, right, left, shoot):
-        """ Устанавливаем клавиши контроля.
+        """ Функция, которая устанавливает клавиши контроля для каждой команды
         """
-        self.up = up
-        self.down = down
-        self.right = right
-        self.left = left
-        self.shoot = shoot
+        self.up = up # вверх
+        self.down = down # вниз
+        self.right = right # вправо
+        self.left = left # влево
+        self.shoot = shoot b #стрелять
 
     def shot(self):
         """ Вызываем выстрел.
@@ -104,9 +114,15 @@ class DefaultTank(Object): # Объект фигуры "Танк"
 
     def update(self, *args):
         """ Функция обновления местоположения танка.
+         *args используется для передачи произвольного числа неименованных аргументов функции.
+         Обновляется каждое количество выстрелов, 
+         проверяется, задел ли танк своего противника выстрелом; 
+         проверяем два возможных исхода. 
+         Если не задел, то игра продолжается и происходит обновление координат положения и направления движения танка и пулей
+         
         """
         global all_objects
-        self.prev_shoot = max(0, self.prev_shoot - 1) # если обновляем кол-во выстрелов
+        self.prev_shoot = max(0, self.prev_shoot - 1) #обновляем кол-во выстрелов
 
         if self.alive: # если танк жив и игра ещё продолжается
             can_move_up = can_move_down = can_move_left = can_move_right = True
@@ -115,14 +131,16 @@ class DefaultTank(Object): # Объект фигуры "Танк"
             righter_rect = pygame.rect.Rect((self.rect.x + 1, self.rect.y, self.rect.h, self.rect.w))
             lefter_rect = pygame.rect.Rect((self.rect.x - 1, self.rect.y, self.rect.h, self.rect.w))
 
-            for object in all_objects:
+            for object in all_objects: # танк не может пройти о стену, он ударяется о нее
                 if ('tank' in object.tags or 'wall' in object.tags) and object != self:
                     can_move_up = can_move_up and not upper_rect.colliderect(object.rect)
                     can_move_down = can_move_down and not lower_rect.colliderect(object.rect)
                     can_move_right = can_move_right and not righter_rect.colliderect(object.rect)
                     can_move_left = can_move_left and not lefter_rect.colliderect(object.rect)
 
-            keys = args[0]
+            keys = args[0] 
+            """собственные перечисляемые свойства объектов (положение, цвет, все координаты) - возвращаются
+            """
             if all([self.up, self.down, self.right, self.left, self.shoot]):
                 if keys[self.up]:
                     if can_move_up:
@@ -148,6 +166,9 @@ class DefaultTank(Object): # Объект фигуры "Танк"
 
     def draw(self, surface, *args): 
         """ Отрисовка направления движения и выстрелов танка.
+         *args используется для передачи произвольного числа неименованных аргументов функции.
+         Отрисовка выполняется с помощью метода blit()
+         Surface - создает дополнительные поверхности, в случае наслаивания обхектов
         """
         self.image.fill(self.color)
         surface.blit(self.image, self.rect)
