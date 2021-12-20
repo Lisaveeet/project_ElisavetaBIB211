@@ -1,3 +1,4 @@
+from _typeshed import Self
 import classes
  
 import unittest
@@ -8,8 +9,13 @@ import pygame
 class GameUnittest(unittest.TestCase):
 
     @patch('shot')
-    def test_alive(self, test_patch):
-        test_patch.return_value = {self.prev_shoot: 0}
+    def test_shot(self, test_patch):
+        Tank = classes.DefaultTank(100, 100, (1, 0), (0, 255, 0))
+        Tank.shot()
+        self.assertEqual(len(classes.all_objects), 1)
+        classes.all_objects = 0
+
+                test_patch.return_value = {self.prev_shoot: 0}
         self.assertRaises(TypeError, self.testListNone[:1])
 
 
